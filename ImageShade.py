@@ -30,13 +30,19 @@ class ImageShade(object):
                     key = (div, x, y)
                     value = small_img.getpixel((x, y))
                     current.add_measure(key, value)
+        return current
 
     def __sub__(self, other):
         if isinstance(other, ImageShade):
-            if not self.measures:
+            distance = 0
+            common_keys = set(self.measures.keys()) & set(other.measures.keys())
+            if not self.measures or not other.measures or not common_keys:
                 return math.inf
-            aggregated_distance = 0
-            for entry in self.measures.items():
-                if entry[0] in other.measures:
-                    other_entry = other.measures[entry[0]]
-                    distance = sum([(d[0] - d[2]) ** 2 for d in zip(entry[1], other_entry[1])]) ** (1/2)
+            for key in common_keys:
+                distance += sum([(d[0] - d[1]) ** 2 for d in zip(self.measures[key], other.measures[key])]) ** (1/2)
+            return distance  # / len(common_keys)
+        else:
+            return math.inf
+
+    def __str__(self):
+        return f"shade of {self.path}"
